@@ -47,11 +47,12 @@ exports.createWindow = function(){
 		data : fakeData,
 		toolTipData : months,
 		selectedLineColors :['yellow','orange'],
-		selectedFillColors :['yellow','orange'],
+		selectedAreaColors :['yellow','orange'],
 		fillColors:['green','blue'],
 		lineColors:['purple','red'],
 		styles :[chart.CHART_AREA_SMOOTH,chart.CHART_AREA_SOLID],
 		selectionBarColor:'#fff',
+		cancelParentGestures:true,
 		chartBackgroundColor:'#404041'
 	});
 	win.add(areaChart);
@@ -101,4 +102,3 @@ exports.createWindow = function(){
 			
 	return win;
 };
-

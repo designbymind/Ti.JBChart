@@ -36,6 +36,7 @@ CGFloat const kJBAreaAnimationDuration = 0.25f;
     _defaultLineColor = [UIColor greenColor];
     _defaultFillColor = [UIColor greenColor];
     _autoRelayoutChartOnOrientationChange = YES;
+    _cancelParentGestures = NO;
 }
 
 -(void)removeFromSuperview
@@ -133,6 +134,13 @@ CGFloat const kJBAreaAnimationDuration = 0.25f;
 {
     ENSURE_SINGLE_ARG(value,NSNumber);
     _autoRelayoutChartOnOrientationChange = [value boolValue];
+}
+
+-(void)setCancelParentGestures_:(id)value
+{
+    ENSURE_SINGLE_ARG(value,NSNumber);
+    _cancelParentGestures = [value boolValue];
+    self.lineChart.cancelParentGestures = _cancelParentGestures;
 }
 
 #pragma mark - Helper Section
@@ -387,6 +395,7 @@ CGFloat const kJBAreaAnimationDuration = 0.25f;
         self.lineChart.delegate = self;
         self.lineChart.dataSource = self;
         self.lineChart.headerPadding =kJBAreaChartViewControllerChartHeaderPadding;
+        self.lineChart.cancelParentGestures = _cancelParentGestures;
 
         id backgroundColor = [self.proxy valueForUndefinedKey:@"chartBackgroundColor"];
         if(backgroundColor == nil){

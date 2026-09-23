@@ -26,6 +26,7 @@
             @"lineColor",
             @"fillColor",
             @"areaStyles",
+            @"cancelParentGestures",
             nil];
 }
 

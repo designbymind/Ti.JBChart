@@ -42,6 +42,13 @@ exports.createWindow = function(){
 		toolTipData : months,
 		barColors:colorData,
 		selectionBarColor:'yellow',
+		barCornerRadius:8,
+		barCornerPosition:chart.BAR_CORNERS_TOP,
+		animateOnLoad:true,
+		animateOnReload:true,
+		barAnimationDuration:350,
+		barAnimationStagger:30,
+		cancelParentGestures:true,
 		chartBackgroundColor:'#404041'
 	});
 	win.add(barChart);

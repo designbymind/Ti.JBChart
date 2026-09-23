@@ -25,6 +25,7 @@
             @"lineWidth",
             @"lineColor",
             @"lineStyles",
+            @"cancelParentGestures",
             nil];
 }
 

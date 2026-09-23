@@ -20,6 +20,7 @@
     UIColor * _defaultSelectedLineColor;
     UIColor * _defaultLineColor;
     BOOL _autoRelayoutChartOnOrientationChange;
+    BOOL _cancelParentGestures;
     float _defaultLineWidth;
 }
 

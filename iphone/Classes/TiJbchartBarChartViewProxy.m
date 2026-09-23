@@ -23,15 +23,23 @@
             @"toolTipData",
             @"selectionBarColor",
             @"barPadding",
+            @"barCornerRadius",
+            @"barCornerPosition",
+            @"animateOnLoad",
+            @"animateOnReload",
+            @"barAnimationDuration",
+            @"barAnimationStagger",
+            @"cancelParentGestures",
             nil];
 }
 
 
--(void)reloadData:(id)unused
+-(void)reloadData:(id)args
 {
+	ENSURE_SINGLE_ARG_OR_NIL(args, NSDictionary);
   	if ([self viewAttached])
 	{
-		TiThreadPerformOnMainThread(^{[(TiJbchartBarChartView*)[self view] reloadData:unused];}, NO);
+		TiThreadPerformOnMainThread(^{[(TiJbchartBarChartView*)[self view] reloadData:args];}, NO);
 	}
 }
 

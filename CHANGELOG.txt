@@ -1,1 +1,20 @@
-Place your change log text here.  This file will be incorporated with your app at package time.
+0.8.0
+
+- Added `barCornerRadius` and `barCornerPosition` for top, bottom, all, or square bar corners.
+- Added opt-in load and reload animations with configurable duration and per-bar stagger.
+- Added `reloadData({ animated: false })` support for one-off animation overrides.
+- Expanded the example gallery with live corner, radius, reload animation, and duration controls.
+
+0.7.1
+
+- Added the opt-in `cancelParentGestures` property to keep chart drags from being cancelled by containing TableViews, ScrollViews, drawers, or interactive window gestures.
+- Replaced the example app with a comprehensive Bar, Line, and Area chart property/style gallery and touch-arbitration A/B test.
+- Corrected the Area chart example to use the native `selectedAreaColors` property.
+
+0.7.0
+
+- Added Titanium SDK 13.3.0.GA or newer compatibility.
+- Added Xcode and iOS 27 SDK build compatibility.
+- Modernized the module package for arm64 devices and arm64/x86_64 simulators.
+- Raised the module deployment target to iOS 15.
+- Preserved the existing BarChartView, LineChartView, and AreaChartView JavaScript APIs.

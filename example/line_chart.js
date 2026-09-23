@@ -51,6 +51,7 @@ exports.createWindow = function(){
 		selectedLineColors :['yellow','orange'],
 		lineColors:['green','blue'],
 		selectionBarColor:'#fff',
+		cancelParentGestures:true,
 		chartBackgroundColor:'#505051'
 	});
 	win.add(lineChart);

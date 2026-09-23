@@ -1058,6 +1058,10 @@ static UIColor *kJBLineChartViewDefaultDotSelectionColor = nil;
 
 - (void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event
 {
+    if (self.state != JBChartViewStateCollapsed && [self.chartData count] > 0)
+    {
+        [self beginCancellingParentGestures];
+    }
     UITouch *touch = [touches anyObject];
     CGPoint touchPoint = [self clampPoint:[touch locationInView:self.linesView] toBounds:self.linesView.bounds padding:[self padding]];
     if (self.showsLineSelection)
@@ -1076,11 +1080,13 @@ static UIColor *kJBLineChartViewDefaultDotSelectionColor = nil;
 - (void)touchesEnded:(NSSet *)touches withEvent:(UIEvent *)event
 {
     [self touchesEndedOrCancelledWithTouches:touches];
+    [self endCancellingParentGestures];
 }
 
 - (void)touchesCancelled:(NSSet *)touches withEvent:(UIEvent *)event
 {
     [self touchesEndedOrCancelledWithTouches:touches];
+    [self endCancellingParentGestures];
 }
 
 @end

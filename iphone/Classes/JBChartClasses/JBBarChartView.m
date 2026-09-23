@@ -40,6 +40,8 @@ static UIColor *kJBBarChartViewDefaultBarColor = nil;
 - (void)construct;
 
 // View quick accessors
+- (void)applyCornerStyleToBarView:(UIView *)barView;
+- (CGRect)animationStartFrameForFinalFrame:(CGRect)finalFrame previousFrame:(NSValue *)previousFrameValue;
 - (CGFloat)availableHeight;
 - (CGFloat)normalizedHeightForRawHeight:(NSNumber*)rawHeight;
 - (CGFloat)barWidth;
@@ -103,6 +105,8 @@ static UIColor *kJBBarChartViewDefaultBarColor = nil;
 - (void)construct
 {
     _showsVerticalSelection = YES;
+    _barCornerRadius = 0.0f;
+    _barCornerPosition = JBBarChartViewCornerPositionTop;
     _cachedMinHeight = kJBBarChartViewUndefinedCachedHeight;
     _cachedMaxHeight = kJBBarChartViewUndefinedCachedHeight;
 }
@@ -118,6 +122,19 @@ static UIColor *kJBBarChartViewDefaultBarColor = nil;
 
 - (void)reloadData
 {
+    [self reloadDataAnimated:NO duration:0.0 stagger:0.0];
+}
+
+- (void)reloadDataAnimated:(BOOL)animated duration:(NSTimeInterval)duration stagger:(NSTimeInterval)stagger
+{
+    NSMutableArray *previousBarFrames = [NSMutableArray array];
+    for (UIView *barView in self.barViews)
+    {
+        CALayer *presentationLayer = (CALayer *)barView.layer.presentationLayer;
+        CGRect visibleFrame = presentationLayer != nil ? presentationLayer.frame : barView.frame;
+        [previousBarFrames addObject:[NSValue valueWithCGRect:visibleFrame]];
+    }
+
     // reset cached max height
     self.cachedMinHeight = kJBBarChartViewUndefinedCachedHeight;
     self.cachedMaxHeight = kJBBarChartViewUndefinedCachedHeight;
@@ -206,6 +223,7 @@ static UIColor *kJBBarChartViewDefaultBarColor = nil;
 
             CGFloat height = [self normalizedHeightForRawHeight:[self.chartDataDictionary objectForKey:key]];
             barView.frame = CGRectMake(xOffset, self.bounds.size.height - height - self.footerView.frame.size.height, [self barWidth], height);
+            [self applyCornerStyleToBarView:barView];
             [mutableBarViews addObject:barView];
             [mutableCachedBarViewHeights addObject:[NSNumber numberWithFloat:height]];
 			
@@ -290,9 +308,63 @@ static UIColor *kJBBarChartViewDefaultBarColor = nil;
 
     // Refresh state
     [self setState:self.state animated:NO force:YES callback:nil];
+
+    BOOL shouldAnimate = animated && duration > 0.0 && !UIAccessibilityIsReduceMotionEnabled();
+    if (shouldAnimate)
+    {
+        NSUInteger index = 0;
+        for (UIView *barView in self.barViews)
+        {
+            CGRect finalFrame = barView.frame;
+            NSValue *previousFrameValue = index < [previousBarFrames count] ? [previousBarFrames objectAtIndex:index] : nil;
+            barView.frame = [self animationStartFrameForFinalFrame:finalFrame previousFrame:previousFrameValue];
+
+            [UIView animateWithDuration:duration
+                                  delay:MAX(0.0, stagger) * index
+                                options:UIViewAnimationOptionBeginFromCurrentState | UIViewAnimationOptionCurveEaseOut
+                             animations:^{
+                                 barView.frame = finalFrame;
+                             }
+                             completion:nil];
+            index++;
+        }
+    }
 }
 
 #pragma mark - View Quick Accessors
+
+- (void)applyCornerStyleToBarView:(UIView *)barView
+{
+    CACornerMask maskedCorners = 0;
+
+    if (self.barCornerPosition & JBBarChartViewCornerPositionTop)
+    {
+        maskedCorners |= kCALayerMinXMinYCorner | kCALayerMaxXMinYCorner;
+    }
+    if (self.barCornerPosition & JBBarChartViewCornerPositionBottom)
+    {
+        maskedCorners |= kCALayerMinXMaxYCorner | kCALayerMaxXMaxYCorner;
+    }
+
+    barView.layer.cornerRadius = MAX(0.0f, self.barCornerRadius);
+    barView.layer.maskedCorners = maskedCorners;
+    barView.layer.masksToBounds = self.barCornerRadius > 0.0f && maskedCorners != 0;
+}
+
+- (CGRect)animationStartFrameForFinalFrame:(CGRect)finalFrame previousFrame:(NSValue *)previousFrameValue
+{
+    CGFloat startingHeight = previousFrameValue != nil ? CGRectGetHeight([previousFrameValue CGRectValue]) : 0.0f;
+    startingHeight = MIN(MAX(0.0f, startingHeight), [self availableHeight]);
+
+    CGRect startingFrame = finalFrame;
+    startingFrame.size.height = startingHeight;
+    if (!self.inverted)
+    {
+        startingFrame.origin.y = CGRectGetMaxY(finalFrame) - startingHeight;
+    }
+
+    return startingFrame;
+}
 
 - (CGFloat)availableHeight
 {
@@ -326,6 +398,24 @@ static UIColor *kJBBarChartViewDefaultBarColor = nil;
 }
 
 #pragma mark - Setters
+
+- (void)setBarCornerRadius:(CGFloat)barCornerRadius
+{
+    _barCornerRadius = MAX(0.0f, barCornerRadius);
+    for (UIView *barView in self.barViews)
+    {
+        [self applyCornerStyleToBarView:barView];
+    }
+}
+
+- (void)setBarCornerPosition:(JBBarChartViewCornerPosition)barCornerPosition
+{
+    _barCornerPosition = barCornerPosition & JBBarChartViewCornerPositionAll;
+    for (UIView *barView in self.barViews)
+    {
+        [self applyCornerStyleToBarView:barView];
+    }
+}
 
 - (void)setState:(JBChartViewState)state animated:(BOOL)animated force:(BOOL)force callback:(void (^)())callback
 {
@@ -624,6 +714,10 @@ static UIColor *kJBBarChartViewDefaultBarColor = nil;
 
 - (void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event
 {
+    if (self.state != JBChartViewStateCollapsed && [[self.chartDataDictionary allKeys] count] > 0)
+    {
+        [self beginCancellingParentGestures];
+    }
     [self touchesBeganOrMovedWithTouches:touches];
 }
 
@@ -635,11 +729,13 @@ static UIColor *kJBBarChartViewDefaultBarColor = nil;
 - (void)touchesEnded:(NSSet *)touches withEvent:(UIEvent *)event
 {
     [self touchesEndedOrCancelledWithTouches:touches];
+    [self endCancellingParentGestures];
 }
 
 - (void)touchesCancelled:(NSSet *)touches withEvent:(UIEvent *)event
 {
     [self touchesEndedOrCancelledWithTouches:touches];
+    [self endCancellingParentGestures];
 }
 
 @end

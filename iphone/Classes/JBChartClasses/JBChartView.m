@@ -18,6 +18,7 @@ static UIColor *kJBChartVerticalSelectionViewDefaultBgColor = nil;
 
 @property (nonatomic, assign) BOOL hasMaximumValue;
 @property (nonatomic, assign) BOOL hasMinimumValue;
+@property (nonatomic, strong) NSArray *disabledParentPanGestureRecognizers;
 
 // Construction
 - (void)constructChartView;
@@ -68,6 +69,64 @@ static UIColor *kJBChartVerticalSelectionViewDefaultBgColor = nil;
 - (void)reloadData
 {
     // Override
+}
+
+- (void)setCancelParentGestures:(BOOL)cancelParentGestures
+{
+    _cancelParentGestures = cancelParentGestures;
+
+    if (!cancelParentGestures)
+    {
+        [self endCancellingParentGestures];
+    }
+}
+
+- (void)beginCancellingParentGestures
+{
+    if (!self.cancelParentGestures || [self.disabledParentPanGestureRecognizers count] > 0)
+    {
+        return;
+    }
+
+    NSMutableArray *disabledRecognizers = [NSMutableArray array];
+    UIView *ancestorView = self.superview;
+
+    while (ancestorView != nil)
+    {
+        for (UIGestureRecognizer *gestureRecognizer in ancestorView.gestureRecognizers)
+        {
+            if ([gestureRecognizer isKindOfClass:[UIPanGestureRecognizer class]] && gestureRecognizer.enabled)
+            {
+                [disabledRecognizers addObject:gestureRecognizer];
+                gestureRecognizer.enabled = NO;
+            }
+        }
+
+        ancestorView = ancestorView.superview;
+    }
+
+    self.disabledParentPanGestureRecognizers = disabledRecognizers;
+}
+
+- (void)endCancellingParentGestures
+{
+    NSArray *disabledRecognizers = self.disabledParentPanGestureRecognizers;
+    self.disabledParentPanGestureRecognizers = nil;
+
+    for (UIGestureRecognizer *gestureRecognizer in disabledRecognizers)
+    {
+        gestureRecognizer.enabled = YES;
+    }
+}
+
+- (void)didMoveToWindow
+{
+    [super didMoveToWindow];
+
+    if (self.window == nil)
+    {
+        [self endCancellingParentGestures];
+    }
 }
 
 #pragma mark - Validation

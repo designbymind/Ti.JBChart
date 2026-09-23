@@ -5,8 +5,8 @@ The Ti.JBChart project providers a wrapper around the [JBChartView](https://gith
 ![Animation](https://github.com/benbahrenburg/Ti.JBChart/blob/master/screenshots/demo.gif)
 
 <h2>Before you start</h2>
-* This is an iOS native module designed to work with Titanium SDK 3.3.0.GA
-* This will only work with iOS <b>7</b> or greater
+* This is an iOS native module designed to work with Titanium SDK 13.3.0.GA or newer
+* This requires iOS <b>15</b> or newer and supports builds with the iOS 27 SDK
 * Before using this module you first need to install the package. If you need instructions on how to install a 3rd party module please read this installation guide.
 
 <h2>Download the compiled release</h2>
@@ -57,7 +57,21 @@ The <b>BarChartView</b> creates a bar chart from an array datasource you provide
 
 <b>barPadding </b><i>optional - float</i> : The padding between bars in the chart.
 
+<b>barCornerRadius </b><i>optional - Number</i> : Corner radius applied to each bar. The default is 0.
+
+<b>barCornerPosition </b><i>optional - Number or String</i> : Corners to round. Use <code>BAR_CORNERS_TOP</code>, <code>BAR_CORNERS_BOTTOM</code>, <code>BAR_CORNERS_ALL</code>, or <code>BAR_CORNERS_NONE</code>. The strings <code>top</code>, <code>bottom</code>, <code>all</code>, and <code>none</code> are also accepted. The default is top.
+
+<b>animateOnLoad </b><i>optional - Bool</i> : When true, bars animate from the baseline when the chart first loads. The default is false.
+
+<b>animateOnReload </b><i>optional - Bool</i> : When true, existing bars animate from their current visible height to their new height when <code>reloadData()</code> is called. The default is false.
+
+<b>barAnimationDuration </b><i>optional - Number</i> : Duration of each bar animation in milliseconds. The default is 350.
+
+<b>barAnimationStagger </b><i>optional - Number</i> : Delay between each bar animation in milliseconds. The default is 30.
+
 <b>chartBackgroundColor </b><i>optional - Color</i> : This property sets the backgroundColor of the chart, which is by default white.  This property can only be set at creation time.
+
+<b>cancelParentGestures </b><i>optional - Bool</i> : When true, chart touches temporarily disable ancestor pan gestures until the touch ends. Use this when a chart is inside a TableView, ScrollView, drawer, or swipe-to-close window. The default is false.
 
 
 <h4>View Example</h4>
@@ -83,13 +97,20 @@ For a complete example, please visit [bar chart in examples](https://github.com/
 		toolTipData : ['January', 'February', 'March', 'April', 'May', 'June','July', 'August', 'September', 'October', 'November', 'December'],
 		barColors:colors,
 		selectionBarColor:'yellow',
-		chartBackgroundColor:'#404041'
+		chartBackgroundColor:'#404041',
+		barCornerRadius:8,
+		barCornerPosition:chart.BAR_CORNERS_TOP,
+		animateOnLoad:true,
+		animateOnReload:true,
+		barAnimationDuration:350,
+		barAnimationStagger:30,
+		cancelParentGestures:true
 	});
 ~~~
 
 <h4>Methods</h4>
 
-<b>reloadData</b> : The reloadData is called after the chart has been rendered to reload the data provided to the views <b>data</b> property.
+<b>reloadData</b> : Reloads the data provided to the view's <b>data</b> property. Pass <code>{ animated: true }</code> or <code>{ animated: false }</code> to override <code>animateOnReload</code> for one call.
 
 <b>Reload Example</b>
 ~~~
@@ -103,6 +124,8 @@ For a complete example, please visit [bar chart in examples](https://github.com/
 	barChart.setData(data);
 	//Reload the chart data
 	barChart.reloadData();
+	// Or bypass the configured reload animation for one update:
+	// barChart.reloadData({ animated: false });
 ~~~
 
 <h4>Events</h4>
@@ -143,9 +166,9 @@ The <b>AreaChartView</b> creates a area chart from an array datasource you provi
 
 <b>fillColors </b><i>optional - Array of Colors</i> : This property sets the color of the fill of the area chart data point. This is an array, with a value for each data source index provided, but default this is green.
 
-<b>defaultSelectedLineColors </b><i>optional - Color</i> : This property sets the default color used for the outline of the selected area, by default this is blue.
+<b>defaultSelectedLineColor </b><i>optional - Color</i> : This property sets the default color used for the outline of the selected area, by default this is blue.
 
-<b>defaultSelectedAreaColors </b><i>optional -  Color</i> : This property sets the default color used for the selected area, by default this is blue.
+<b>defaultSelectedAreaColor </b><i>optional -  Color</i> : This property sets the default color used for the selected area, by default this is blue.
 
 <b>defaultLineColors </b><i>optional - Color</i> : This property sets default area outline color to be used unless otherwise specified, by default this is green.
 
@@ -154,6 +177,8 @@ The <b>AreaChartView</b> creates a area chart from an array datasource you provi
 <b>styles </b><i>optional - Array of Styles</i> : This property sets the style of the Area Chart.  By default this style is CHART_AREA_SMOOTH.  This can be changed by providing an array of styles, one for each chart data source provided.  See example for a reference on how this is implemented.
 
 <b>chartBackgroundColor </b><i>optional - Color</i> : This property sets the backgroundColor of the chart, which is by default white.  This property can only be set at creation time.
+
+<b>cancelParentGestures </b><i>optional - Bool</i> : When true, chart touches temporarily disable ancestor pan gestures until the touch ends. The default is false.
 
 <h4>View Example</h4>
 
@@ -188,11 +213,12 @@ For a complete example, please visit [area chart in examples](https://github.com
 		data : data,
 		toolTipData : ['January', 'February', 'March', 'April', 'May', 'June','July', 'August', 'September', 'October', 'November', 'December'],
 		selectedLineColors :['yellow','orange'],
-		selectedFillColors :['yellow','orange'],
+		selectedAreaColors :['yellow','orange'],
 		fillColors:['green','blue'],
 		styles :myStyles,
 		selectionBarColor:'#fff',
-		chartBackgroundColor:'#404041'
+		chartBackgroundColor:'#404041',
+		cancelParentGestures:true
 	});
 ~~~
 
@@ -254,6 +280,8 @@ The <b>LineChartView</b> creates a line chart from an array datasource you provi
 
 <b>chartBackgroundColor </b><i>optional - Color</i> : This property sets the backgroundColor of the chart, which is by default white.  This property can only be set at creation time.
 
+<b>cancelParentGestures </b><i>optional - Bool</i> : When true, chart touches temporarily disable ancestor pan gestures until the touch ends. The default is false.
+
 <h4>View Example</h4>
 
 For a complete example, please visit [line chart in examples](https://github.com/benbahrenburg/Ti.JBChart/blob/master/example/line_chart.js)
@@ -290,7 +318,8 @@ For a complete example, please visit [line chart in examples](https://github.com
 		lineColors:['green','blue'],
 		styles : myStyles,
 		selectionBarColor:'purple',
-		chartBackgroundColor:'#404041'
+		chartBackgroundColor:'#404041',
+		cancelParentGestures:true
 	});
 ~~~
 

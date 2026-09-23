@@ -23,6 +23,7 @@
     UIColor * _defaultLineColor;
     UIColor * _defaultFillColor;
     BOOL _autoRelayoutChartOnOrientationChange;
+    BOOL _cancelParentGestures;
 }
 @property (nonatomic, strong) JBChartTooltipView *tooltipView;
 @property (nonatomic, strong) JBChartTooltipTipView *tooltipTipView;

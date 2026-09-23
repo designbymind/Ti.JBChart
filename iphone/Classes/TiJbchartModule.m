@@ -14,6 +14,7 @@
 #import "TiHost.h"
 #import "TiUtils.h"
 #import "JBConstants.h"
+#import "JBBarChartView.h"
 #import "JBLineChartView.h"
 
 @implementation TiJbchartModule
@@ -72,5 +73,10 @@ MAKE_SYSTEM_UINT(CHART_LINE_DASHED, JBLineChartViewLineStyleDashed);
 
 MAKE_SYSTEM_UINT(CHART_AREA_SMOOTH, JBLineChartViewLineStyleSolid);
 MAKE_SYSTEM_UINT(CHART_AREA_SOLID, JBLineChartViewLineStyleDashed);
+
+MAKE_SYSTEM_UINT(BAR_CORNERS_NONE, JBBarChartViewCornerPositionNone);
+MAKE_SYSTEM_UINT(BAR_CORNERS_TOP, JBBarChartViewCornerPositionTop);
+MAKE_SYSTEM_UINT(BAR_CORNERS_BOTTOM, JBBarChartViewCornerPositionBottom);
+MAKE_SYSTEM_UINT(BAR_CORNERS_ALL, JBBarChartViewCornerPositionAll);
 
 @end

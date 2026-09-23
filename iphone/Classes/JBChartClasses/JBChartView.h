@@ -107,6 +107,19 @@ typedef NS_ENUM(NSInteger, JBChartViewState){
 @property (nonatomic, assign) CGFloat minimumValue;
 @property (nonatomic, assign) CGFloat maximumValue;
 
+/**
+ *  When enabled, a touch that begins inside the chart temporarily disables
+ *  ancestor pan gesture recognizers until the touch ends or is cancelled.
+ *  This prevents containing scroll views and interactive window or drawer
+ *  gestures from cancelling chart selection while the user drags across it.
+ *
+ *  Default: NO
+ */
+@property (nonatomic, assign) BOOL cancelParentGestures;
+
+- (void)beginCancellingParentGestures;
+- (void)endCancellingParentGestures;
+
 // reset to default (chart's data source min & max value)
 - (void)resetMinimumValue;
 - (void)resetMaximumValue;

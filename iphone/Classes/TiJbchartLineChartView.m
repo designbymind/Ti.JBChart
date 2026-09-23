@@ -28,6 +28,7 @@ CGFloat const kJBLineAnimationDuration = 0.25f;
     _defaultLineColor = [UIColor greenColor];
     _defaultLineWidth = 6.0f;
     _autoRelayoutChartOnOrientationChange = YES;
+    _cancelParentGestures = NO;
 }
 
 -(void)removeFromSuperview
@@ -122,6 +123,13 @@ CGFloat const kJBLineAnimationDuration = 0.25f;
 {
     ENSURE_SINGLE_ARG(value,NSNumber);
     _autoRelayoutChartOnOrientationChange = [value boolValue];
+}
+
+-(void)setCancelParentGestures_:(id)value
+{
+    ENSURE_SINGLE_ARG(value,NSNumber);
+    _cancelParentGestures = [value boolValue];
+    self.lineChart.cancelParentGestures = _cancelParentGestures;
 }
 
 -(UIColor *)findForColor:(NSUInteger)index withColorArray:(NSArray*)colorsToQuery withDefaultColor:(UIColor *) defColor
@@ -373,6 +381,7 @@ CGFloat const kJBLineAnimationDuration = 0.25f;
         self.lineChart.delegate = self;
         self.lineChart.dataSource = self;
         self.lineChart.headerPadding =kJBLineChartViewControllerChartHeaderPadding;
+        self.lineChart.cancelParentGestures = _cancelParentGestures;
 
         id backgroundColor = [self.proxy valueForUndefinedKey:@"chartBackgroundColor"];
         if(backgroundColor == nil){

@@ -11,6 +11,13 @@
 
 @class JBBarChartView;
 
+typedef NS_OPTIONS(NSUInteger, JBBarChartViewCornerPosition) {
+    JBBarChartViewCornerPositionNone = 0,
+    JBBarChartViewCornerPositionTop = 1 << 0,
+    JBBarChartViewCornerPositionBottom = 1 << 1,
+    JBBarChartViewCornerPositionAll = JBBarChartViewCornerPositionTop | JBBarChartViewCornerPositionBottom
+};
+
 @protocol JBBarChartViewDataSource <JBChartViewDataSource>
 
 @required
@@ -135,6 +142,26 @@
  *  Default: NO.
  */
 @property (nonatomic, assign, getter=isInverted) BOOL inverted;
+
+/**
+ *  Radius applied to the selected top, bottom, or all bar corners.
+ *
+ *  Default: 0.0
+ */
+@property (nonatomic, assign) CGFloat barCornerRadius;
+
+/**
+ *  Physical corners to round on each bar.
+ *
+ *  Default: JBBarChartViewCornerPositionTop
+ */
+@property (nonatomic, assign) JBBarChartViewCornerPosition barCornerPosition;
+
+/**
+ *  Rebuilds the chart and optionally animates each bar from its previous
+ *  visible height (or the chart baseline for new bars) to its new height.
+ */
+- (void)reloadDataAnimated:(BOOL)animated duration:(NSTimeInterval)duration stagger:(NSTimeInterval)stagger;
 
 /**
  *  The bar view at a particular index.

@@ -20,7 +20,15 @@
     UIColor * _defaultBarColor;
     float _barCount;
     float _barPadding;
+    float _barCornerRadius;
+    NSUInteger _barCornerPosition;
+    double _barAnimationDuration;
+    double _barAnimationStagger;
+    BOOL _animateOnLoad;
+    BOOL _animateOnReload;
+    BOOL _hasLoadedData;
     BOOL _autoRelayoutChartOnOrientationChange;
+    BOOL _cancelParentGestures;
     BOOL _debug;
 }
 

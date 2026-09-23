@@ -19,7 +19,16 @@ CGFloat const kJBBarAnimationDuration = 0.25f;
 
 -(void)reloadData:(id)unused
 {
-    [self.barChart reloadData];
+    BOOL animated = _hasLoadedData ? _animateOnReload : _animateOnLoad;
+    if ([unused isKindOfClass:[NSDictionary class]] && [unused objectForKey:@"animated"] != nil)
+    {
+        animated = [TiUtils boolValue:@"animated" properties:unused def:animated];
+    }
+
+    [self.barChart reloadDataAnimated:animated
+                             duration:MAX(0.0, _barAnimationDuration) / 1000.0
+                              stagger:MAX(0.0, _barAnimationStagger) / 1000.0];
+    _hasLoadedData = YES;
 }
 
 -(void)initializeState
@@ -30,7 +39,15 @@ CGFloat const kJBBarAnimationDuration = 0.25f;
     _selectionBarColor = [UIColor whiteColor];
     _barCount = 1;
     _barPadding = kJBBarChartViewControllerBarPadding;
+    _barCornerRadius = 0.0f;
+    _barCornerPosition = JBBarChartViewCornerPositionTop;
+    _barAnimationDuration = 350.0;
+    _barAnimationStagger = 30.0;
+    _animateOnLoad = NO;
+    _animateOnReload = NO;
+    _hasLoadedData = NO;
     _autoRelayoutChartOnOrientationChange = YES;
+    _cancelParentGestures = NO;
 }
 
 -(void)removeFromSuperview
@@ -81,10 +98,78 @@ CGFloat const kJBBarAnimationDuration = 0.25f;
     _barPadding = [value floatValue];
 }
 
+-(void)setBarCornerRadius_:(id)value
+{
+    ENSURE_TYPE_OR_NIL(value,NSNumber);
+    _barCornerRadius = MAX(0.0f, [value floatValue]);
+    self.barChart.barCornerRadius = _barCornerRadius;
+}
+
+-(void)setBarCornerPosition_:(id)value
+{
+    if ([value isKindOfClass:[NSString class]])
+    {
+        NSString *position = [(NSString *)value lowercaseString];
+        if ([position isEqualToString:@"none"])
+        {
+            _barCornerPosition = JBBarChartViewCornerPositionNone;
+        }
+        else if ([position isEqualToString:@"bottom"])
+        {
+            _barCornerPosition = JBBarChartViewCornerPositionBottom;
+        }
+        else if ([position isEqualToString:@"all"])
+        {
+            _barCornerPosition = JBBarChartViewCornerPositionAll;
+        }
+        else
+        {
+            _barCornerPosition = JBBarChartViewCornerPositionTop;
+        }
+    }
+    else
+    {
+        ENSURE_TYPE_OR_NIL(value,NSNumber);
+        _barCornerPosition = [value unsignedIntegerValue] & JBBarChartViewCornerPositionAll;
+    }
+    self.barChart.barCornerPosition = _barCornerPosition;
+}
+
+-(void)setAnimateOnLoad_:(id)value
+{
+    ENSURE_SINGLE_ARG(value,NSNumber);
+    _animateOnLoad = [value boolValue];
+}
+
+-(void)setAnimateOnReload_:(id)value
+{
+    ENSURE_SINGLE_ARG(value,NSNumber);
+    _animateOnReload = [value boolValue];
+}
+
+-(void)setBarAnimationDuration_:(id)value
+{
+    ENSURE_TYPE_OR_NIL(value,NSNumber);
+    _barAnimationDuration = MAX(0.0, [value doubleValue]);
+}
+
+-(void)setBarAnimationStagger_:(id)value
+{
+    ENSURE_TYPE_OR_NIL(value,NSNumber);
+    _barAnimationStagger = MAX(0.0, [value doubleValue]);
+}
+
 -(void)setAutoRelayoutChartOnOrientationChange_:(id)value
 {
     ENSURE_SINGLE_ARG(value,NSNumber);
     _autoRelayoutChartOnOrientationChange = [value boolValue];
+}
+
+-(void)setCancelParentGestures_:(id)value
+{
+    ENSURE_SINGLE_ARG(value,NSNumber);
+    _cancelParentGestures = [value boolValue];
+    self.barChart.cancelParentGestures = _cancelParentGestures;
 }
 
 #pragma mark - Helper Section
@@ -302,6 +387,9 @@ CGFloat const kJBBarAnimationDuration = 0.25f;
         self.barChart.dataSource = self;
         self.barChart.headerPadding =kJBBarChartViewControllerChartHeaderPadding;
         self.barChart.minimumValue = 0.0f;
+        self.barChart.cancelParentGestures = _cancelParentGestures;
+        self.barChart.barCornerRadius = _barCornerRadius;
+        self.barChart.barCornerPosition = _barCornerPosition;
 
         id backgroundColor = [self.proxy valueForUndefinedKey:@"chartBackgroundColor"];
         if(backgroundColor == nil){
@@ -313,7 +401,7 @@ CGFloat const kJBBarAnimationDuration = 0.25f;
         }
 
 		[self addSubview:self.barChart];
-        [self.barChart reloadData];
+        [self reloadData:nil];
         
         // add a orientation listener
         [[NSNotificationCenter defaultCenter] addObserver: self
